@@ -6,6 +6,8 @@ COPY . .
 
 RUN mvn clean package
 
+#Dockerfile mult stage, afim de garantir cash e gerar um .jar reutilizavel.
+
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
