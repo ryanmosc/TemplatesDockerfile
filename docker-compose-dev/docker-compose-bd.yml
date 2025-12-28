@@ -1,0 +1,36 @@
+services:
+
+  db:
+    image: postgres:16
+    container_name: nome_do_container
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - networkName
+
+  app:
+    container_name: nome_do_container
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - networkName
+    env_file:
+      - .env
+    depends_on:
+      - serviceName
+    restart: always
+
+networks:
+  networkName:
+    driver: bridge
+volumes:
+  networkName:
+    driver: bridge
+    
+  

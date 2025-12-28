@@ -8,6 +8,7 @@ services:
       - .env
     networks:
       - networkName
+    restart: always
 
 networks:
   networkName:
