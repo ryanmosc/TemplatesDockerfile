@@ -1,0 +1,14 @@
+services:
+  app:
+    image: seu_usuario_dockerhub/nome_projeto:tag
+    container_name: nome_do_container
+    ports:
+      - 8080:8080
+    env_file:
+      - .env
+    networks:
+      - networkName
+
+networks:
+  networkName:
+    driver: bridge
