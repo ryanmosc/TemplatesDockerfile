@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16
+    container_name: nome_do_container
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - networkName
+  app:
+    image: seu_usuario_dockerhub/nome_projeto:tag
+    container_name: nome_do_container
+    ports:
+      - 8080:8080
+    env_file:
+      - .env
+    networks:
+      - networkName
+    restart: always
+
+networks:
+  networkName:
+    driver: bridge
