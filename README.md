@@ -156,8 +156,141 @@ docker build -t minha-app .
 docker run minha-app
 ```
 
+# 🧩 Docker Compose Curinga (Reutilizável)
+
+Este `docker-compose.yml` foi pensado para ser **genérico**, **flexível** e **reutilizável** para a maioria dos projetos backend modernos.
+
+Ele funciona como base para **Python, Node, Java, PHP** e aplicações que dependem de **PostgreSQL**.
+
 ---
 
+## 📄 docker-compose.yml
+
+```yaml
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: app_container
+    ports:
+      - "${APP_PORT}:8000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  db:
+    image: postgres:16
+    container_name: postgres_container
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+volumes:
+  postgres_data:
+```
+
+---
+
+## 📄 .env (exemplo)
+
+```env
+# Aplicação
+APP_PORT=8000
+
+# Banco de dados
+POSTGRES_DB=appdb
+POSTGRES_USER=appuser
+POSTGRES_PASSWORD=apppass
+DB_HOST=db
+```
+
+---
+
+## 🧠 Por que esse compose é "curinga"
+
+* Serve para **qualquer backend** que exponha uma porta
+* Banco desacoplado da aplicação
+* Variáveis via `.env`
+* Healthcheck garante que o app só suba após o banco
+* Volume persistente para dados
+* Volume de código para desenvolvimento
+
+---
+
+## 🚀 Como reutilizar em outro projeto
+
+1. Copie `docker-compose.yml`
+2. Copie `.env.example` → `.env`
+3. Ajuste:
+
+   * `APP_PORT`
+   * Porta interna da aplicação (8000)
+   * Imagem do banco, se necessário
+
+---
+
+## 🔄 Ajustes comuns por linguagem
+
+### Python
+
+* Porta interna: `8000`
+* Comando definido no Dockerfile
+
+### Node.js
+
+* Porta interna: `3000`
+* Ajustar `ports` para `${APP_PORT}:3000`
+
+### Java (Spring Boot)
+
+* Porta interna: `8080`
+* Ajustar `ports` para `${APP_PORT}:8080`
+
+### PHP
+
+* Porta interna: `80`
+* Remover volume de código em produção
+
+---
+
+## ⚠️ Observações Importantes
+
+* Ideal para **desenvolvimento e CI**
+* Para produção:
+
+  * remover volume de código
+  * usar secrets
+  * ajustar restart policy
+
+---
+
+## 🎯 Uso recomendado
+
+* Projetos pessoais
+* Estudos DevOps
+* CI/CD com Docker Compose
+* Portfólio
+
+---
+
+Esse compose serve como **base sólida**, não como regra fixa.
+Adapte conforme o cenário.
+
+
+---
 
 ---
 
