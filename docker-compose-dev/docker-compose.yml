@@ -1,0 +1,17 @@
+services:
+  app:
+    container_name: nome_do_container
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - networkName
+    env_file:
+      - .env
+    depends_on:
+      - serviceName
+    restart: always
+    
+  
