@@ -1,0 +1,354 @@
+ANOTAÇÕES – CURSO DOCKER
+=======================
+
+--------------------------------------------------
+1. CONCEITOS FUNDAMENTAIS
+--------------------------------------------------
+
+O que é um Container:
+- Container é um ambiente isolado que empacota uma aplicação junto com tudo o que ela precisa para rodar.
+- Os projetos são executados dentro de containers.
+- Quem executa as instruções é o container.
+
+O que é uma Imagem:
+- A imagem é o “passo a passo” que define como o container será criado.
+- É a imagem que contém as instruções.
+- Uma imagem pode depender de outras imagens (imagem base).
+
+Fluxo básico:
+- Criamos (ou usamos) uma imagem
+- Executamos essa imagem através de um container
+
+Imagens são buscadas no Docker Hub.
+
+--------------------------------------------------
+2. COMANDOS BÁSICOS DE CONTAINER
+--------------------------------------------------
+
+Rodar um container em modo interativo:
+docker run -it imagem
+
+Listar containers em execução:
+docker ps
+
+Listar todos os containers (ativos e parados):
+docker ps -a
+
+Rodar container em background (detached):
+docker run -d imagem
+
+--------------------------------------------------
+3. PORTAS E ACESSO EXTERNO
+--------------------------------------------------
+
+Por padrão, o Docker é isolado e não tem acesso externo.
+Para permitir acesso, precisamos expor portas.
+
+Sintaxe:
+-p porta_host:porta_container
+
+Exemplo:
+docker run -d -p 3000:80 nginx
+
+--------------------------------------------------
+4. CONTROLE DE EXECUÇÃO
+--------------------------------------------------
+
+Parar um container:
+docker stop <id> ou <nome>
+
+Iniciar um container existente:
+docker start <id> ou <nome>
+
+OBS:
+- docker run cria um NOVO container
+- docker start reutiliza um container existente
+- Em produção, prefira start para não perder dados
+
+--------------------------------------------------
+5. NOMEANDO CONTAINERS
+--------------------------------------------------
+
+Definir nome para um container (somente no run):
+docker run -d -p 80:80 --name app nginx
+
+--------------------------------------------------
+6. LOGS E MONITORAMENTO
+--------------------------------------------------
+
+Visualizar logs:
+docker logs <id_container>
+
+Logs em tempo real:
+docker logs -f <id_container>
+
+--------------------------------------------------
+7. REMOÇÃO DE CONTAINERS
+--------------------------------------------------
+
+Remover container:
+docker rm <id_container>
+
+Forçar remoção:
+docker rm -f <id_container>
+
+--------------------------------------------------
+8. BOAS PRÁTICAS COM IMAGENS
+--------------------------------------------------
+
+Sempre observar:
+- Se a imagem é oficial
+- Quantidade de downloads
+- Quantidade de stars no Docker Hub
+
+--------------------------------------------------
+9. DOCKERFILE E CRIAÇÃO DE IMAGENS
+--------------------------------------------------
+
+Para criar uma imagem, precisamos de um Dockerfile
+O Dockerfile fica na raiz do projeto
+
+Principais instruções:
+
+FROM      -> Imagem base
+WORKDIR   -> Diretório da aplicação
+EXPOSE    -> Porta da aplicação
+RUN       -> Executa comandos
+COPY      -> Copia arquivos para a imagem
+
+--------------------------------------------------
+10. BUILD E EXECUÇÃO DE IMAGENS
+--------------------------------------------------
+
+Criar a imagem:
+docker build -t nome_da_imagem .
+
+Executar a imagem:
+docker run -d -p 8080:8080 <id_imagem>
+
+OBS:
+Sempre que o código muda, é necessário fazer o build novamente,
+pois o Docker entende como uma nova imagem.
+
+--------------------------------------------------
+11. CAMADAS (LAYERS) E CACHE
+--------------------------------------------------
+
+As imagens são divididas em camadas (layers).
+Cada instrução no Dockerfile cria uma camada.
+
+O Docker reutiliza camadas em cache para acelerar o build.
+
+Exemplo:
+FROM imagem_base
+WORKDIR /src
+
+Se apenas o WORKDIR mudar, a imagem base será reaproveitada do cache.
+
+--------------------------------------------------
+12. PULL, HELP E MULTIPLOS CONTAINERS
+--------------------------------------------------
+
+Baixar imagem sem rodar:
+docker pull imagem
+
+Ver ajuda de comandos:
+docker run --help
+
+É possível rodar múltiplos containers da mesma imagem,
+desde que:
+- Portas sejam diferentes
+- Nomes sejam diferentes
+
+--------------------------------------------------
+13. TAGS E VERSIONAMENTO
+--------------------------------------------------
+
+Criar tag:
+docker tag <id> nome:tag
+
+Build com nome e tag:
+docker build -t meu_projeto:v1 .
+
+--------------------------------------------------
+14. MODO INTERATIVO APÓS START
+--------------------------------------------------
+
+Ao reiniciar um container:
+docker start -i <nome_container>
+
+--------------------------------------------------
+15. REMOÇÃO DE IMAGENS
+--------------------------------------------------
+
+Remover imagem:
+docker rmi <id>
+
+Forçar remoção:
+docker rmi -f <id>
+
+Limpeza geral (containers, imagens e redes não usados):
+docker system prune
+
+--------------------------------------------------
+16. CONTAINERS TEMPORÁRIOS
+--------------------------------------------------
+
+Remover container automaticamente após parar:
+--rm
+
+Exemplo:
+docker run -d -p 80:80 --rm nginx
+
+Muito usado para testes.
+
+--------------------------------------------------
+17. CÓPIA DE ARQUIVOS
+--------------------------------------------------
+
+Copiar arquivos entre host e container:
+docker cp container:/caminho destino
+
+--------------------------------------------------
+18. INSPEÇÃO E MONITORAMENTO
+--------------------------------------------------
+
+Processos do container:
+docker top <container>
+
+Detalhes completos do container:
+docker inspect <container>
+
+Visão geral de consumo:
+docker stats
+
+--------------------------------------------------
+19. DOCKER HUB (LOGIN E PUSH)
+--------------------------------------------------
+
+Login:
+docker login -u usuario
+
+Logout:
+docker logout
+
+Enviar imagem:
+docker push usuario/nome_projeto
+
+Baixar imagem:
+docker pull usuario/nome_projeto
+
+Atualizar versão:
+docker push usuario/nome_projeto:v2
+
+OBS:
+Imagens públicas não exigem login para download.
+
+--------------------------------------------------
+20. VOLUMES (PERSISTÊNCIA DE DADOS)
+--------------------------------------------------
+
+Volumes permitem persistir dados mesmo após o container parar.
+
+Tipos:
+- Anônimos
+- Nomeados
+- Bind Mounts
+
+Volume anônimo:
+docker run -v /data imagem
+
+Volume nomeado:
+docker run -v nome_volume:/diretorio imagem
+
+Bind Mount:
+Mapeia um diretório do host para o container
+Muito usado para logs e desenvolvimento em tempo real
+
+Comandos de volume:
+docker volume create <nome>
+docker volume ls
+docker volume inspect <nome>
+docker volume rm <nome>
+docker volume prune
+
+--------------------------------------------------
+21. NETWORKS (REDES DOCKER)
+--------------------------------------------------
+
+Networks controlam a comunicação entre containers e o mundo externo.
+
+Tipos de conexão:
+- Externa
+- Host
+- Entre containers
+
+Drivers:
+- Bridge (mais comum)
+- Host
+- Macvlan
+- None
+- Plugins
+
+Listar redes:
+docker network ls
+
+Criar rede:
+docker network create nome_rede
+
+Remover rede:
+docker network rm nome_rede
+
+Limpeza geral:
+docker network prune
+
+--------------------------------------------------
+22. YAML (DOCKER COMPOSE)
+--------------------------------------------------
+
+YAML trabalha com identação e chave: valor
+
+Exemplo:
+nome: ryan
+
+Comentários:
+# comentário
+
+Tipos de dados:
+Inteiro: 10
+Float: 15.5
+String: "texto" ou texto
+Nulo: null ou ~
+Booleano:
+- True / On
+- False / Off
+
+Arrays:
+[1, 2, 3]
+
+Ou:
+- item1
+- item2
+
+Dicionários:
+obj:
+  a: 1
+  b: 2
+--------------------------------------------------
+Docker compose:
+
+Para usarmos o docker compose, devemos criar um arquivo na raiz do projeto chamado:
+- docker-compose.yml
+
+Para rodar o compose utilizamos:
+- docker compose up
+Para rodar em background:
+- docker compose up -d
+Parar o docker compose:
+- docker compose down
+
+Para colocar variaveis de ambiente utilizamos:
+
+- ${VAR}
+
+
